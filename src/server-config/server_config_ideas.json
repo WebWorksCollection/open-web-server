@@ -1,0 +1,51 @@
+{
+
+
+  "http" :
+  [
+
+
+    {
+      "virtual_host" : {
+
+        "listen" : [
+          {"bind_ip" : "127.0.0.1", "port" : "12343", "ip_protocol" : "IPv4_IPv6"},
+          {"port" : "443", "cryptography" : "TLS"}
+        ],
+
+        "server_name": ["localhost", "www.localhost", "*.localhost.com"],
+        "document_root" : "/Users/yiannis/www/localhost/public_html",
+        "letsencrypt" : "/Users/yiannis/www/localhost/letsencrypt"
+      }
+    },
+
+    {
+      "virtual_host" : {
+        "listen" : [
+          {"bind_ip" : "127.0.0.1", "port" : "12343"}
+        ],
+
+        "server_name": ["*"],
+        "document_root" : "/Users/yiannis/www/default/public_html"
+      }
+    }
+
+
+  ],
+
+  "server" : {
+
+    "cache" : {
+      "total_size" : "102400",
+      "maximum_file_size" : "5120",
+      "cleanup_percentage" : "15"
+    },
+
+    "send_file_chunk_size" : "32768",
+
+    "indexes" : ["index.html","index.htm","default.html","default.htm", "50x.html", "default-72b.html"]
+  }
+
+
+
+}

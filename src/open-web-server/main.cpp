@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
     ServerConfig server_config;
     ServerConfigParser server_config_parser;
     server_config.server_config_parser = &server_config_parser;
-    server_config.parse_config_file("/Users/yiannis/server_config.json");
+    server_config.parse_config_file("/Users/yiannis/Projects/open-web-server-github/open-web-server/src/server-config/server_config.json");
 
 
     PollServer pollserver;
