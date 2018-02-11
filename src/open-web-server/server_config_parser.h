@@ -21,11 +21,8 @@
 #ifndef SERVER_CONFIG_PARSER_H
 #define SERVER_CONFIG_PARSER_H
 
-#include <QString>
-#include <unordered_map>
 #include "server_config_virtualhost.h"
 #include "server_config_parser_base.h"
-#include "qstring_hash_specialization.h"
 
 
 class ServerConfigParser : public ServerConfigParserBase

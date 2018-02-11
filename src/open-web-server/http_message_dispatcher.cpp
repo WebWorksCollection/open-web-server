@@ -101,7 +101,7 @@ void HTTP_Message_Dispatcher::proccess_new_client_session(ClientSession &client_
 
         }
 
-        ssize_t res = SendData(client_session);
+        long res = SendData(client_session);
 
         if (res > 0 && client_session.send_message_has_more_bytes == false){
             //stalthikan olla ta data, opote den xreiazetai na kanoume kati allo
@@ -150,7 +150,7 @@ void HTTP_Message_Dispatcher::proccess_pending_client_session_queue(std::unorder
             it->second.front().send_message.insert(it->second.front().send_message.end(), resp.begin(), resp.end());
             */
         }
-        ssize_t res = SendData(it->second.front());
+        long res = SendData(it->second.front());
 
         if (res > 0 && it->second.front().send_message_has_more_bytes == false){
             //stalthikan olla ta data, opote to vgazw apo to queue
@@ -193,7 +193,7 @@ void HTTP_Message_Dispatcher::proccess_pending_client_session_queue(std::unorder
 }
 
 
-ssize_t HTTP_Message_Dispatcher::SendData(ClientSession &client_session){
+long HTTP_Message_Dispatcher::SendData(ClientSession &client_session){
     size_t bytes_to_send = 0;
     std::vector<char> * response_data;
     int snd = 0;
@@ -499,7 +499,7 @@ bool HTTP_Message_Dispatcher::proccessDirectory(ClientSession &client_session){
         }else {
             url_encoded = file.fileName().replace(" ", "%20").toStdWString();
             //einai arxeio
-            os << "<br /><a href=""" << (client_session.request.request_uri == slash ?
+            os << "<br /><a href=""" << (client_session.request.request_uri.endsWith(slash) ?
                                              client_session.request.request_uri.toStdWString() :
                                              client_session.request.request_uri.toStdWString() +  slash.toStdWString())
                                         + url_encoded << """>"

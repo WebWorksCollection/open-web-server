@@ -56,6 +56,10 @@
 #define bcopy(b1,b2,len) (memmove((b2), (b1), (len)), (void) 0)
 #define in_addr_t uint32_t
 #pragma comment(lib, "Ws2_32.lib")
+
+#define close closesocket
+#define ioctl ioctlsocket
+#define poll WSAPoll
 #endif
 
 class PollServer
@@ -105,8 +109,13 @@ private:
     //SSL_CTX *sslctx_;
     //std::map<int, SSL*> sslmap_;
     bool use_ssl_ = false;
-    struct pollfd fds[100000];
 
+    //TODO: hardcoded 100000 fds. Isws na to kanw megalytero an xreiazetai
+#ifndef WIN32
+    struct pollfd fds[100000];
+#else
+    WSAPOLLFD fds[100000];
+#endif
 };
 
 #endif // POLL_SERVER_H

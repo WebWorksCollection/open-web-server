@@ -152,11 +152,7 @@ void PollServer::setSocketNonBlocking(int socket){
     if (rc < 0)
     {
       displayLastError("ioctl() failed for listen_sd");
-      #ifdef WIN32
-      closesocket(socket);
-      #else
       close(socket);
-      #endif
       exit(-1);
     }
 }
@@ -165,13 +161,26 @@ void PollServer::start(int server_port, protocol ip_protocol)
 {
   Q_UNUSED(ip_protocol);
   int    len, rc, on = 1;
-  int    listen_sd = -1, new_sd = -1;
   bool   end_server = false, compress_array = false;
   int    close_conn;
   //char   buffer[80];
   std::vector<char> recv_buffer(65535); //16192 65535
   struct sockaddr_in   addr;
   int    nfds = 1, current_size = 0, i, j;
+
+#ifdef WIN32
+    SOCKET    listen_sd = -1, new_sd = -1;
+    // Initialize Winsock
+    int iResult;
+    WSADATA wsaData;
+    iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
+    if (iResult != 0) {
+        std::cout << "WSAStartup failed: " << iResult << std::endl;
+        exit(-1);
+    }
+#else
+    int    listen_sd = -1, new_sd = -1;
+#endif
 
   /*************************************************************/
   /* Create an AF_INET stream socket to receive incoming       */
@@ -201,7 +210,11 @@ void PollServer::start(int server_port, protocol ip_protocol)
   /* the incoming connections will also be nonblocking since  */
   /* they will inherit that state from the listening socket.   */
   /*************************************************************/
+#ifdef WIN32
+  rc = ioctl(listen_sd, FIONBIO, (u_long *)&on);
+#else
   rc = ioctl(listen_sd, FIONBIO, (char *)&on);
+#endif
   if (rc < 0)
   {
     perror("ioctl() failed");
@@ -251,7 +264,11 @@ void PollServer::start(int server_port, protocol ip_protocol)
   /* Set up the initial listening socket                        */
   /*************************************************************/
   fds[0].fd = listen_sd;
+#ifndef WIN32
   fds[0].events = POLLIN | POLLERR | POLLHUP | POLLNVAL;
+#else
+   fds[0].events = POLLRDNORM;
+#endif
 
 
   /*************************************************************/
@@ -301,8 +318,11 @@ void PollServer::start(int server_port, protocol ip_protocol)
       /* If revents is not POLLIN, it's an unexpected result,  */
       /* log and end the server.                               */
       /*********************************************************/
-
+#ifndef WIN32
       if( ! ((fds[i].revents & POLLIN) || (fds[i].revents & POLLOUT)) )
+#else
+      if( ! ((fds[i].revents & POLLRDNORM) || (fds[i].revents & POLLWRNORM)) )
+#endif
       {
         qwe("Error! revents = ", fds[i].revents);
         qwe("will close socket: ", fds[i].fd);
@@ -341,10 +361,18 @@ void PollServer::start(int server_port, protocol ip_protocol)
           /* failure on accept will cause us to end the        */
           /* server.                                           */
           /*****************************************************/
-          new_sd = accept(listen_sd, NULL, NULL);
+            new_sd = accept(listen_sd, NULL, NULL);
+            //Sta windows, gia kapoio logo to new_sd epistrefei MAX_UINT
+            //otan den yparxei allo socket gia accept kai oxi -1 opws ginetai se linux/osx
+  #ifdef WIN32
+          if (new_sd == UINT_MAX || new_sd < 0)
+          {
+             if (WSAGetLastError() != WSAEWOULDBLOCK || WSAGetLastError() != EAGAIN)
+  #else
           if (new_sd < 0)
           {
-            if (errno != EWOULDBLOCK || errno != EAGAIN)
+            if (errno != EWOULDBLOCK || errno != EAGAIN))
+  #endif
             {
               perror("  accept() failed");
               //end_server = true;
@@ -367,7 +395,11 @@ void PollServer::start(int server_port, protocol ip_protocol)
           /*****************************************************/
           qwe("New incoming connection: ", new_sd);
           fds[nfds].fd = new_sd;
+#ifndef WIN32
           fds[nfds].events = POLLIN;
+#else
+          fds[nfds].events = POLLRDNORM;
+#endif
           nfds++;
 
           /*****************************************************/
@@ -377,18 +409,29 @@ void PollServer::start(int server_port, protocol ip_protocol)
         } while (new_sd != -1); //do ACCEPT connections loop
       } // if listen_sd
 
-
+#ifndef WIN32
       else if (fds[i].revents & POLLOUT){
+#else
+      else if (fds[i].revents & POLLWRNORM){
+#endif
           qwe("Descriptor is WRITABLE: ", fds[i].fd);
           bool pollout_events = false;
           bool shoud_close_socket = false;
           msgComposer->onClientReadySend(fds[i].fd, pollout_events, shoud_close_socket);
 
+#ifndef WIN32
           if (pollout_events){
               fds[i].events = POLLIN | POLLOUT;
           }else {
               fds[i].events = POLLIN;
           }
+#else
+          if (pollout_events){
+              fds[i].events = POLLRDNORM | POLLWRNORM;
+          }else {
+              fds[i].events = POLLRDNORM;
+          }
+#endif
 
           if(shoud_close_socket){
               qwe("will close socket: ", fds[i].fd);
@@ -455,19 +498,31 @@ void PollServer::start(int server_port, protocol ip_protocol)
             msgComposer->onClientDataArrived(fds[i].fd, recv_buffer, rc, pollout_events, shoud_close_socket);
 
 
-
+#ifndef WIN32
             if (pollout_events){
                 fds[i].events = POLLIN | POLLOUT;
             }else {
                 fds[i].events = POLLIN;
             }
+#else
+            if (pollout_events){
+                fds[i].events = POLLRDNORM | POLLWRNORM;
+            }else {
+                fds[i].events = POLLRDNORM;
+            }
+#endif
+
 
             if(shoud_close_socket){
                 close_conn = true;
             }
 
           }else if (rc < 0) {
+#ifndef WIN32
             if (errno != EWOULDBLOCK || errno != EAGAIN)
+#else
+            if (WSAGetLastError() != WSAEWOULDBLOCK || WSAGetLastError() != EAGAIN)
+#endif
             {
               perror("  recv() failed");
               close_conn = true;

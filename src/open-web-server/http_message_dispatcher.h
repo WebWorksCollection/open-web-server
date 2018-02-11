@@ -63,7 +63,7 @@ private:
     QMimeType mime_type_;
 
     //methods
-    ssize_t SendData(ClientSession &client_session);
+    long SendData(ClientSession &client_session);
     void onClientRequest(ClientSession &client_session);
     bool loadFileToVector(ClientSession &client_session, std::vector<char> &response_body_vect);
     void proccessFile(ClientSession &client_session, std::vector<char> &response_body_vect, bool merge_only);
