@@ -25,8 +25,10 @@ ClientSession::ClientSession()
     //send_message.reserve(512);
 }
 
+/*
 ClientSession::ClientSession(const int __socket, const std::vector<char> &data, const int data_size) :
     socket(__socket), request(std::move(std::vector<char>(data.begin(), data.begin()+data_size)))
 {
 }
+*/
 

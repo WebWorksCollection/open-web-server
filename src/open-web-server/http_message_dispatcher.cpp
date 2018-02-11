@@ -101,7 +101,11 @@ void HTTP_Message_Dispatcher::proccess_new_client_session(ClientSession &client_
 
         }
 
+#ifndef WIN32
+        ssize_t res = SendData(client_session);
+#else
         long res = SendData(client_session);
+#endif
 
         if (res > 0 && client_session.send_message_has_more_bytes == false){
             //stalthikan olla ta data, opote den xreiazetai na kanoume kati allo
@@ -150,7 +154,12 @@ void HTTP_Message_Dispatcher::proccess_pending_client_session_queue(std::unorder
             it->second.front().send_message.insert(it->second.front().send_message.end(), resp.begin(), resp.end());
             */
         }
+
+#ifndef WIN32
+        ssize_t res = SendData(it->second.front());
+#else
         long res = SendData(it->second.front());
+#endif
 
         if (res > 0 && it->second.front().send_message_has_more_bytes == false){
             //stalthikan olla ta data, opote to vgazw apo to queue
@@ -192,8 +201,11 @@ void HTTP_Message_Dispatcher::proccess_pending_client_session_queue(std::unorder
     }//for
 }
 
-
+#ifndef WIN32
+ssize_t HTTP_Message_Dispatcher::SendData(ClientSession &client_session){
+#else
 long HTTP_Message_Dispatcher::SendData(ClientSession &client_session){
+#endif
     size_t bytes_to_send = 0;
     std::vector<char> * response_data;
     int snd = 0;

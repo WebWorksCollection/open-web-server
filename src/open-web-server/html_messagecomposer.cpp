@@ -63,11 +63,11 @@ void HTML_MessageComposer::onClientDataArrived(const int socket, const std::vect
     if (stored_client == messages_.end()){
         //den yparxoun data gia afto to socket
         //opote ta kataxwrw olla
-        //ClientSession tmpcsession;
-        //tmpcsession.socket = socket;
-        //std::move(data.begin(), data.begin() + data_size, std::back_inserter(tmpcsession.request.request_header));
+        ClientSession tmpcsession;
+        tmpcsession.socket = socket;
+        std::move(data.begin(), data.begin() + data_size, std::back_inserter(tmpcsession.request.request_header));
+        //ClientSession tmpcsession(socket, data, data_size);
 
-        ClientSession tmpcsession(socket, data, data_size);
         //elegxo ean to mynima exe symplirwthei
         if (verify_new_MessageComplete(tmpcsession, pollout_events, should_close_socket) == false){
             messages_.emplace(socket, std::move(tmpcsession));

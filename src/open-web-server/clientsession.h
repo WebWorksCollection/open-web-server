@@ -30,7 +30,8 @@ class ClientSession
 {
 public:
     ClientSession();
-    ClientSession(const int __socket, const std::vector<char> &data, const int data_size);
+
+    //ClientSession(const int __socket, const std::vector<char> &data, const int data_size);
 
     int socket;//to socket pou client sto opoio ginetai i apostoli dedomenwn
     bool ewouldblock_flag = false;//gia megala mynimata, ean den ginei apostoli me ena send, thetei afto to flag se true
