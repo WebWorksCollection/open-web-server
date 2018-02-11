@@ -371,7 +371,7 @@ void PollServer::start(int server_port, protocol ip_protocol)
   #else
           if (new_sd < 0)
           {
-            if (errno != EWOULDBLOCK || errno != EAGAIN))
+            if (errno != EWOULDBLOCK || errno != EAGAIN)
   #endif
             {
               perror("  accept() failed");
