@@ -93,8 +93,9 @@ int HTTP_Header_parser::parse()
                  std::string until(request.begin() + range_dash + 1,
                                    request.begin() + range_end);
                  range_from_byte = std::stoull(from);
-                 char *end;
-                 range_until_byte = std::strtoull(until.c_str(), &end, 10);
+                 range_until_byte = std::stoull(until);
+                 //char *end;
+                 //range_until_byte = std::strtoull(until.c_str(), &end, 10);
                  has_range_header = true;
 
                  //std::cout << "ok";

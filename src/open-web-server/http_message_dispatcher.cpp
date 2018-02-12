@@ -84,6 +84,12 @@ void HTTP_Message_Dispatcher::onNewMessageArrived(ClientSession &client_session,
 
     if (it == pending_responds_.end()){
         //nea kataxwrisi
+
+        //std::queue<ClientSession> q;
+        //q.push(std::move(client_session));
+        //auto pair = pending_responds_.emplace(std::make_pair(client_session.socket, std::move(q)));
+        //proccess_pending_client_session_queue(pair.first, pollout_events, should_close_socket);
+
         proccess_new_client_session(client_session, pollout_events, should_close_socket);
     } else {
         //yparxei kai alli kataxwrisi gia to idio socket
@@ -120,11 +126,11 @@ void HTTP_Message_Dispatcher::proccess_new_client_session(ClientSession &client_
         } else if (res == -1 && client_session.ewouldblock_flag == true){
             //den kanw tipota allo kai perimeno
             //na ginei to socket etoimo gia send
+            client_session.ewouldblock_flag = false;
             std::queue<ClientSession> q;
             q.push(std::move(client_session));
             pending_responds_.emplace(std::make_pair(client_session.socket, std::move(q)));
 
-            client_session.ewouldblock_flag = false;
             pollout_events = true;
             break;
         } else {
@@ -295,7 +301,12 @@ void HTTP_Message_Dispatcher::onClientRequest(ClientSession &client_session){
                     return;
                 }
             }//cached
+        } else {//if has range header
+            //to kalw gia na parei to absolute path timi giati otan yparxei range header
+            //den ypologizetai to absolute path
+            server_config_->is_valid_requested_hostname(client_session.request);
         }
+
     }//elegxos ean einai cached to resource.
     //************************************************************************
 
