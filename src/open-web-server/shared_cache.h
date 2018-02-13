@@ -25,10 +25,14 @@
 #include <unordered_map>
 #include <QString>
 #include <vector>
+#include <QFileSystemWatcher>
 #include <qstring_hash_specialization.h>
+#include <QObject>
+#include "cache_key.h"
 
-class SharedCache
+class SharedCache : public QObject
 {
+    Q_OBJECT
 public:
     SharedCache();
 
@@ -36,9 +40,14 @@ public:
     long long int max_file_size = 20971520; // [20971520 20MB, 1048576 1MB] megixto megethos arxeiou pou mporei na mpoei stin cache
     long long int cache_max_size = 419430400; //400MB megixto megethos cache
     long long int cache_current_size = 0;
+    QFileSystemWatcher file_system_watcher;
 
-    std::unordered_map<QString, std::vector<char>> cache_;
+    std::unordered_map<CacheKey, std::vector<char>> cache_;
 
+public slots:
+    void slot_fileChanged(const QString &path);
+
+private:
 };
 
 #endif // SHARED_CACHE_H

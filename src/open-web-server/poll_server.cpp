@@ -47,6 +47,7 @@
 #include "helper_functions.h"
 
 #include "qglobal.h" //for Q_UNUSED
+#include <QCoreApplication>
 
 int PollServer::s_listen_sd;
 
@@ -270,6 +271,7 @@ void PollServer::start(int server_port, protocol ip_protocol)
    fds[0].events = POLLRDNORM;
 #endif
 
+   std::chrono::time_point<std::chrono::high_resolution_clock> qt_process_events_timer_last = std::chrono::high_resolution_clock::now();
 
   /*************************************************************/
   /* Loop waiting for incoming connects or for incoming data   */
@@ -283,6 +285,16 @@ void PollServer::start(int server_port, protocol ip_protocol)
     /***********************************************************/
     qwe("Waiting on poll()...", "");
     rc = poll(fds, nfds, -1);
+
+    //Elegxei tyxwn events apo filesystemwatcher, wste na enimerwthei i cache, ena exei ginei allagei se
+    //kapoio arxeio poy vrisketai stin cache
+    //TODO: na mpei sto setting tou server kathe poso na elegxetai i cache
+    if (std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::high_resolution_clock::now() - qt_process_events_timer_last).count() > 5000)
+    {
+        QCoreApplication::processEvents();
+        qt_process_events_timer_last = std::chrono::high_resolution_clock::now();
+    }
 
     /***********************************************************/
     /* Check to see if the poll call failed.                   */

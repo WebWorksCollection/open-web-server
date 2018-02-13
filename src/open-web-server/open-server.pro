@@ -49,7 +49,8 @@ SOURCES += main.cpp \
     server_config.cpp \
     server_config_parser.cpp \
     server_config_virtualhost.cpp \
-    server_config_parser_base.cpp
+    server_config_parser_base.cpp \
+    cache_key.cpp
 
 HEADERS += \
     poll_server.h \
@@ -65,4 +66,5 @@ HEADERS += \
     server_config_parser.h \
     server_config_virtualhost.h \
     server_config_parser_base.h \
-    qstring_hash_specialization.h
+    qstring_hash_specialization.h \
+    cache_key.h

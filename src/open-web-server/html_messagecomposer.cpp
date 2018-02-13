@@ -65,19 +65,27 @@ void HTML_MessageComposer::onClientDataArrived(const int socket, const std::vect
         //opote ta kataxwrw olla
         ClientSession tmpcsession;
         tmpcsession.socket = socket;
+
+        //tmpcsession.request.request_header = std::vector<char>(data.begin(), data.begin()+data_size);//TODO rapsberry
         std::move(data.begin(), data.begin() + data_size, std::back_inserter(tmpcsession.request.request_header));
+
         //ClientSession tmpcsession(socket, data, data_size);
 
         //elegxo ean to mynima exe symplirwthei
         if (verify_new_MessageComplete(tmpcsession, pollout_events, should_close_socket) == false){
-            messages_.emplace(socket, std::move(tmpcsession));
+            //messages_.emplace(std::make_pair(socket, std::move(tmpcsession)));
+            messages_.emplace(std::make_pair(socket, tmpcsession));
         }
     } else {
         //proyparxoun dedomena, opote ta kanw merge
         //TODO: na to kanw me std::move
+        //me std::make_move_iterator den ginetai build sto raspberry (g++ 4.9)
+        //stored_client->second.request.request_header.insert(stored_client->second.request.request_header.end(),
+        //                                          std::make_move_iterator(data.begin()),
+        //                                          std::make_move_iterator(data.begin() + data_size));
         stored_client->second.request.request_header.insert(stored_client->second.request.request_header.end(),
-                                                  std::make_move_iterator(data.begin()),
-                                                  std::make_move_iterator(data.end()));
+                                                  data.begin(),
+                                                  data.begin() + data_size);
         //elegxo ean to mynima exe symplirwthei
         verifyMessageComplete(stored_client, pollout_events, should_close_socket);
     }

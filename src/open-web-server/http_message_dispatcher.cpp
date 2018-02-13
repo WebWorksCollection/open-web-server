@@ -25,6 +25,7 @@
 
 #include <string>
 #include <iostream>
+#include "cache_key.h"
 
 #ifndef WIN32
 #include <sys/ioctl.h>
@@ -59,8 +60,6 @@
 #include <sstream>
 #include <iostream>
 #include <QString>
-#include <QRegExp>
-#include <QTcpSocket>
 
 HTTP_Message_Dispatcher::HTTP_Message_Dispatcher()
 {
@@ -376,8 +375,11 @@ bool HTTP_Message_Dispatcher::check_add_to_cache(ClientSession &client_session){
             //client_session.cache_iterator = HTTP_Message_Dispatcher::cache_.find(client_session.request.request_path);
             shared_cache_.cache_current_size += response_body_vect.size();
             client_session.cache_iterator = shared_cache_.cache_.emplace(
-                        std::make_pair(client_session.request.get_hostname_and_requested_path(), std::move(response_body_vect))).first;
+                        std::make_pair(CacheKey(client_session.request.get_hostname_and_requested_path(),client_session.request.absolute_hostname_and_requested_path_), std::move(response_body_vect))).first;
             client_session.is_cached = true;
+
+            //afou topothetithike to arxeio stin cache, to kataxwrw kai sto filesystemwatcher
+            shared_cache_.file_system_watcher.addPath(client_session.request.absolute_hostname_and_requested_path_);
             return true;
         }
     }

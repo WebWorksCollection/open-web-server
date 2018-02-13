@@ -25,6 +25,7 @@
 #include <unordered_map>
 #include <http_header_parser.h>
 #include "qstring_hash_specialization.h"
+#include "cache_key.h"
 
 class ClientSession
 {
@@ -45,7 +46,7 @@ public:
 
 
     //cache specific
-    std::unordered_map<QString, std::vector<char>>::iterator cache_iterator;
+    std::unordered_map<CacheKey, std::vector<char>>::iterator cache_iterator;
     bool is_cached = false;//flag pou otan einai true simainei oti to resource tha apostalei apo tin cache.
     bool cache_cheked = false;//flag pou simatodotee ean exei ginei elegxos tou resource gia tin parousia tou stin cache
 

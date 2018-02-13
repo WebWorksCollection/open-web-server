@@ -48,17 +48,18 @@ bool ServerConfigParser::parse_config_file(const QString &filename, std::unorder
 
 
     for (int i = 0; i < http_settings.size(); i++){
-        QJsonArray srv = http_settings.at(i)["virtual_host"]["server_name"].toArray();
+        QJsonArray srv = http_settings.at(i)["virtual_host"].toObject()["server_name"].toArray();
+//QJsonArray srv = http_settings.at(i).toObject().ob["virtual_host"].toObject()["server_name"].toArray();
 
-        QJsonArray listen_array = http_settings.at(i)["virtual_host"]["listen"].toArray();
+        QJsonArray listen_array = http_settings.at(i)["virtual_host"].toObject()["listen"].toArray();
         for (int listen_idx = 0; listen_idx < listen_array.size(); listen_idx++){
             for (int j = 0; j < srv.size(); j++){
                 ServerConfigVirtualHost vhost;
                 vhost.ServerName.push_back(srv.at(j).toString());
-                vhost.DocumentRoot = http_settings.at(i)["virtual_host"]["document_root"].toString();
+                vhost.DocumentRoot = http_settings.at(i)["virtual_host"].toObject()["document_root"].toString();
 
                 //directory indexes
-                for (auto idx_itm : json_doc["server"]["indexes"].toArray()){
+                for (auto idx_itm : json_doc["server"].toObject()["indexes"].toArray()){
                     vhost.directoryIndexes.push_back(idx_itm.toString());
                 }
 

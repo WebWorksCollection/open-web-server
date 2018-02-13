@@ -29,8 +29,35 @@
 
 
 #include "shared_cache.h"
+#include <QCoreApplication>
+#include <iostream>
 
 SharedCache::SharedCache()
 {
+    QString app_path = QCoreApplication::applicationDirPath();
+
+    this->connect(&file_system_watcher,
+                     SIGNAL(fileChanged(QString)),
+                     this,
+                     SLOT(slot_fileChanged(QString)));
+
+    /*
+    this->connect(&file_system_watcher_,
+                     SIGNAL(directoryChanged(QString)),
+                     this,
+                     SLOT(slot_fileChanged(QString)));
+*/
+}
+
+void SharedCache::slot_fileChanged(const QString &path)
+{
+    file_system_watcher.removePath(path);
+
+    for (auto it = cache_.begin(); it != cache_.end(); it++){
+        if (it->first.real_file_path == path){
+            cache_.erase(it);
+            break;
+        }//if
+    }//for
 
 }
