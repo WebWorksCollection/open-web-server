@@ -46,6 +46,7 @@ int main(int argc, char *argv[])
 
     HTML_MessageComposer html_msg_composer;
     html_msg_composer.http_msg_dispatcher_.server_config_ = &server_config;
+    html_msg_composer.http_msg_dispatcher_.shared_cache_.server_config_ = &server_config;
     pollserver.msgComposer = &html_msg_composer;
 
     pollserver.start(12343, PollServer::IPv4);

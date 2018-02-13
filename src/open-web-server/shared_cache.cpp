@@ -34,8 +34,6 @@
 
 SharedCache::SharedCache()
 {
-    QString app_path = QCoreApplication::applicationDirPath();
-
     this->connect(&file_system_watcher,
                      SIGNAL(fileChanged(QString)),
                      this,
@@ -47,17 +45,36 @@ SharedCache::SharedCache()
                      this,
                      SLOT(slot_fileChanged(QString)));
 */
+
+    file_system_watcher.addPath(app_path + "/" + server_config_filename);
 }
 
 void SharedCache::slot_fileChanged(const QString &path)
 {
-    file_system_watcher.removePath(path);
+    if (path == app_path + "/" + server_config_filename){
+        //allagi sto server config
 
-    for (auto it = cache_.begin(); it != cache_.end(); it++){
-        if (it->first.real_file_path == path){
-            cache_.erase(it);
-            break;
-        }//if
-    }//for
+        //gia logous aplotitas afairw ola ta index files apo tin cache
+        //giati mporei na yparxei stin cache p.x. localhost kai na anaferetai sto arxeio pou yparxei sto localhost/index.html
+        for (auto vhost_config : server_config_->server_config_map){
+            for (auto dir_indexes : vhost_config.second.directoryIndexes){
+                for (auto it = cache_.begin(); it != cache_.end(); it++){
+                    if (it->first.real_file_path.endsWith(dir_indexes)){
+                        cache_.erase(it);
+                    }//if
+                }//for cache_
+            }//for dir_indexes
+        }//for vhost_config
 
+        server_config_->parse_config_file(path);
+    }else{
+        //allagi se file pou yparxei stin cache
+        file_system_watcher.removePath(path);
+        for (auto it = cache_.begin(); it != cache_.end(); it++){
+            if (it->first.real_file_path == path){
+                cache_.erase(it);
+                break;
+            }//if
+        }//for
+    }
 }

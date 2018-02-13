@@ -67,4 +67,7 @@ HEADERS += \
     server_config_virtualhost.h \
     server_config_parser_base.h \
     qstring_hash_specialization.h \
-    cache_key.h
+    cache_key.h \
+    json.hpp
+
+DISTFILES +=

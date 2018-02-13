@@ -43,6 +43,7 @@ public:
 
     //variables
     ServerConfig *server_config_;
+    SharedCache shared_cache_;
 
     //methods
 
@@ -52,7 +53,6 @@ public:
     void onClientDisconnect(const int socket);
 private:
     //variables
-    SharedCache shared_cache_;
     std::unordered_map<int, std::queue<ClientSession>> pending_responds_;
 
     //xwrizei to arxeio pou zitithike se tmimata isa me ta bytes pou orizontai.

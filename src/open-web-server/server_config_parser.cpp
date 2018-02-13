@@ -21,12 +21,9 @@
 #include "server_config_parser.h"
 #include <QFile>
 #include <iostream>
-#include <QJsonDocument>
-#include <typeinfo>
-#include <QJsonArray>
-#include <QJsonObject>
-#include <QJsonValueRef>
-#include <QVector>
+#include <fstream>
+
+#include "json.hpp"
 
 ServerConfigParser::ServerConfigParser()
 {
@@ -35,40 +32,42 @@ ServerConfigParser::ServerConfigParser()
 
 bool ServerConfigParser::parse_config_file(const QString &filename, std::unordered_map<QString, ServerConfigVirtualHost> &server_config_map)
 {
-    QFile file(filename);
+    std::ifstream i(filename.toStdString());
+    if (!i.is_open()) return false;
 
-    if (!file.open(QIODevice::ReadOnly))
-           return false;
+    server_config_map.clear();
 
-    QJsonDocument json_doc(QJsonDocument::fromJson(file.readAll()));
+    nlohmann::json j;
+    i >> j;
 
-    QJsonArray http_settings = json_doc["http"].toArray();
+    auto http_settings_ = j["http"];
 
-    QJsonArray server_indexes = json_doc["server"]["indexes"].toArray();
+    for (auto http_setting : http_settings_){
+    //for (size_t i = 0; i < http_settings.size(); i++){
+        auto vhost_hostnames = http_setting["virtual_host"]["server_name"];
 
+        for (auto listen__ : http_setting["virtual_host"]["listen"]){
+            for (size_t vhost_hostnames_idx = 0; vhost_hostnames_idx < vhost_hostnames.size(); vhost_hostnames_idx++){
 
-    for (int i = 0; i < http_settings.size(); i++){
-        QJsonArray srv = http_settings.at(i)["virtual_host"].toObject()["server_name"].toArray();
-//QJsonArray srv = http_settings.at(i).toObject().ob["virtual_host"].toObject()["server_name"].toArray();
+                QString port__ = QString::fromStdString(listen__["port"].get<std::string>());
 
-        QJsonArray listen_array = http_settings.at(i)["virtual_host"].toObject()["listen"].toArray();
-        for (int listen_idx = 0; listen_idx < listen_array.size(); listen_idx++){
-            for (int j = 0; j < srv.size(); j++){
                 ServerConfigVirtualHost vhost;
-                vhost.ServerName.push_back(srv.at(j).toString());
-                vhost.DocumentRoot = http_settings.at(i)["virtual_host"].toObject()["document_root"].toString();
+                QString vhost_name = QString::fromStdString(vhost_hostnames.at(vhost_hostnames_idx).get<std::string>());
+                vhost.ServerName.push_back(vhost_name);
+                vhost.DocumentRoot = QString::fromStdString(http_setting["virtual_host"]["document_root"].get<std::string>());
 
                 //directory indexes
-                for (auto idx_itm : json_doc["server"].toObject()["indexes"].toArray()){
-                    vhost.directoryIndexes.push_back(idx_itm.toString());
+                for (auto idx_itm : j["server"]["indexes"]){
+                    vhost.directoryIndexes.push_back(QString::fromStdString(idx_itm.get<std::string>()));
                 }
 
                 //kataxwrisi tou vhost sto unordered map
-                QString server_and_port = srv.at(j).toString() != "*" ? srv.at(j).toString() + ":" + listen_array.at(listen_idx)["port"].toString() : srv.at(j).toString();
+                QString server_and_port = vhost_name != "*" ? vhost_name + ":" + port__ : vhost_name;
                 server_config_map.emplace(std::make_pair(server_and_port, vhost));
-            }//server_name array for loop end
-        }//listen array for loop end
-    }
+            }
+
+        }//for listen_array
+    }//for http_settings
 
     return true;
 }

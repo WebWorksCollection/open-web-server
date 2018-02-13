@@ -29,6 +29,8 @@
 #include <qstring_hash_specialization.h>
 #include <QObject>
 #include "cache_key.h"
+#include <QCoreApplication>
+#include "server_config.h"
 
 class SharedCache : public QObject
 {
@@ -42,7 +44,11 @@ public:
     long long int cache_current_size = 0;
     QFileSystemWatcher file_system_watcher;
 
+    QString server_config_filename = "server_config.json";
+    QString app_path = QCoreApplication::applicationDirPath();
+
     std::unordered_map<CacheKey, std::vector<char>> cache_;
+    ServerConfig *server_config_;
 
 public slots:
     void slot_fileChanged(const QString &path);
