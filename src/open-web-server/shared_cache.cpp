@@ -58,10 +58,12 @@ void SharedCache::slot_fileChanged(const QString &path)
         //giati mporei na yparxei stin cache p.x. localhost kai na anaferetai sto arxeio pou yparxei sto localhost/index.html
         for (auto vhost_config : server_config_->server_config_map){
             for (auto dir_indexes : vhost_config.second.directoryIndexes){
-                for (auto it = cache_.begin(); it != cache_.end(); it++){
+                for (auto it = cache_.begin(); it != cache_.end();){
                     if (it->first.real_file_path.endsWith(dir_indexes)){
-                        cache_.erase(it);
-                    }//if
+                        it = cache_.erase(it);
+                    } else {
+                        it++;
+                    } //if
                 }//for cache_
             }//for dir_indexes
         }//for vhost_config
