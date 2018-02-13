@@ -48,6 +48,7 @@
 
 #include "qglobal.h" //for Q_UNUSED
 #include <QCoreApplication>
+#include <chrono>
 
 int PollServer::s_listen_sd;
 
