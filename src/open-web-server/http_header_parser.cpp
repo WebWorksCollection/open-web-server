@@ -51,7 +51,13 @@ int HTTP_Header_parser::parse()
         int get_end = request.find(" ", get_start + 4);
         std::string url(request.begin() + 4, request.begin() + get_end);
         int get_end_idx = get_end + 9;
+
         request_uri = std::move(QString::fromStdString(url).replace("%20", " "));
+
+        //request_uri = "/../../../";
+        //request_uri = "/../../../back_f2.png";
+        //request_uri = "././.";
+
         //url = "" + url + "";
         //******************************************
 

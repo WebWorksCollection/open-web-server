@@ -337,7 +337,6 @@ void HTTP_Message_Dispatcher::load_and_proccess_file(ClientSession &client_sessi
 }
 
 bool HTTP_Message_Dispatcher::check_add_to_cache(ClientSession &client_session){
-
     //elegxw ean to hostname pou zitithike anikei se virtual server.
     //1. Ean anikei, thetei sto client_session.request.absolute_hostname_and_requested_path_
     //to absolute path gia to uri pou zitithike.
@@ -345,6 +344,8 @@ bool HTTP_Message_Dispatcher::check_add_to_cache(ClientSession &client_session){
     if (server_config_->is_valid_requested_hostname(client_session.request) == false){
         return false;
     }
+
+    if(is_malicious_path(client_session.request.absolute_hostname_and_requested_path_)) return false;
 
     //prospathw na anoiksw to arxeio pou zitithike
     QFile file_io(client_session.request.absolute_hostname_and_requested_path_);
@@ -386,8 +387,11 @@ bool HTTP_Message_Dispatcher::check_add_to_cache(ClientSession &client_session){
     return false; //to arxeio den epitrepetai na mpei stin cache
 }
 
+
 //epistrefei false ean den vrethike to arxeio, alliws true
 bool HTTP_Message_Dispatcher::loadFileToVector(ClientSession &client_session, std::vector<char> &response_body_vect){
+    if(is_malicious_path(client_session.request.absolute_hostname_and_requested_path_)) return false;
+
     QFile file_io(client_session.request.absolute_hostname_and_requested_path_);
 
     if (file_io.open(QFileDevice::ReadOnly) == false) return false;
@@ -420,6 +424,11 @@ bool HTTP_Message_Dispatcher::loadFileToVector(ClientSession &client_session, st
     }
 
     return true;
+}
+
+bool HTTP_Message_Dispatcher::is_malicious_path(QString path)
+{
+    return path.contains("..");
 }
 
 void HTTP_Message_Dispatcher::proccessFile(ClientSession &client_session, std::vector<char> &response_body_vect, bool merge_only){

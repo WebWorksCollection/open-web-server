@@ -76,6 +76,7 @@ private:
     void proccess404(ClientSession &client_session);
     void load_and_proccess_file(ClientSession &client_session);
     bool check_add_to_cache(ClientSession &client_session);
+    bool is_malicious_path(QString path);
 
     void proccess_pending_client_session_queue(std::unordered_map<int, std::queue<ClientSession>>::iterator it, bool &pollout_events, bool &should_close_socket);
     void proccess_new_client_session(ClientSession &client_session, bool &pollout_events, bool &should_close_socket);
